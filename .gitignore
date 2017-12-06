@@ -1,5 +1,3 @@
-.idea
-.DS_Store
-build
-dist
-random_access_file_reader.egg-info
+# ignore directories
+development/__pycache__/*
+development/.vs/*
