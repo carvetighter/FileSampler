@@ -99,7 +99,7 @@ class CsvRandomAccessReader(RandomAccessReader):
         self.has_header = has_header
         if has_header:
             dialect = self.MyDialect(self._endline, self._quotechar, self._delimiter)
-            b = StringIO.(self.get_lines(0)[0])
+            b = StringIO(self.get_lines(0)[0])
             r = csv.reader(b, dialect)
             values = tuple(next(r))
             self._headers = values
@@ -120,7 +120,7 @@ class CsvRandomAccessReader(RandomAccessReader):
         :return: tuple of str
         """
         dialect = self.MyDialect(self._endline, self._quotechar, self._delimiter)
-        b = StringIO.(line)
+        b = StringIO(line)
         r = csv.reader(b, dialect)
         values = tuple(next(r))
         if len(self._headers) != len(values):
