@@ -34,14 +34,18 @@ class RandomAccessReader(object):
         self._filepath = filepath
         self._endline = endline_character
         self._ignore_blanks = ignore_blank_lines
+        self._int_num_lines = self._count_lines()
         self._lines = self._get_line_data()
 
     @property
     def number_of_lines(self):
-        return len(self._lines)
+        return _int_num_lines
 
     def get_line_indexes(self):
         return range(len(self._lines))
+
+    def _count_lines(self):
+        return sum(1 for line in open(self._filepath))
 
     def _get_line_data(self):
         f = open(self._filepath)
