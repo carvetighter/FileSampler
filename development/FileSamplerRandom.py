@@ -41,7 +41,7 @@ class RandomAccessReader(object):
 
     @property
     def number_of_lines(self):
-        return _int_num_lines
+        return self._int_num_lines
 
     def get_line_indexes(self):
         return range(len(self._lines))
@@ -109,8 +109,8 @@ class CsvRandomAccessReader(RandomAccessReader):
         """
         :param filepath:
         :param has_header:
-        :param kwargs: endline_character='\n', values_delimiter=',', 
-        quotechar='"', ignore_corrupt=False, ignore_blank_lines=True
+        :param kwargs: endline_character = '\n', values_delimiter = ',', 
+        quotechar = '"', ignore_corrupt = False, ignore_blank_lines = True
         """
         super(CsvRandomAccessReader, self).__init__(filepath, kwargs.get('endline_character','\n'), 
                                                     kwargs.get('ignore_blank_lines', True))
