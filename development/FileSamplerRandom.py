@@ -95,8 +95,10 @@ class RandomAccessReader(object):
         :return: str
         """
         with open(self._filepath) as f:
-            f.seek(m_int_line_number * self._int_avg_len)
-            if not bool_header:
+            if bool_header or m_int_line_number == 0:
+                f.seek(m_int_line_number)
+            else:
+                f.seek(m_int_line_number * self._int_avg_len - int(self._int_avg_len / 2))
                 f.readline()
             return f.readline()
 
@@ -147,11 +149,11 @@ class CsvRandomAccessReader(RandomAccessReader):
             return None
         return values
 
-    def get_sample(self, m_int_num_samples, m_bool_headers = False):
+    def get_sample(self, m_int_num_samples):
         """
         gets the requested line as a dictionary (header values are the keys)
-        :param line_number: requested line number, 0-indexed (disregards the header line if present)
-        :return: dict
+        :param m_int_num_samples: requested line number, 0-indexed (disregards the header line if present)
+        :return: list of tuples
         """
         if m_int_num_samples > self._int_num_lines:
             raise ValueError('Number of samples requested is more than the number of lines in the file')
@@ -160,14 +162,18 @@ class CsvRandomAccessReader(RandomAccessReader):
             list_random_lines = random.sample(range(1, self._int_num_lines), m_int_num_samples)
         else:
             list_random_lines = random.sample(range(0, self._int_num_lines), m_int_num_samples)
-        lines = []
-        text_line = self.get_line(line_number)
-            #vals = self._get_line_values(text_lines[x])
-            #if vals is None:
-            #    lines.append(dict(zip(self._headers, list(range(len(self._headers))))))
-            #else:
-            #    lines.append(dict(zip(self._headers, vals)))
-        return self._get_line_values(text_line)
+        
+        list_lines = []
+        for int_line in list_random_lines:
+            text_line = self.get_line(int_line)
+            list_lines.append(self._get_line_values(text_line))
+
+        #vals = self._get_line_values(text_lines[x])
+        #if vals is None:
+        #    lines.append(dict(zip(self._headers, list(range(len(self._headers))))))
+        #else:
+        #    lines.append(dict(zip(self._headers, vals)))
+        return list_lines
 
     class MyDialect(csv.Dialect):
         strict = True

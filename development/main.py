@@ -14,14 +14,15 @@ timer_test = Timer()
 #txt_reader = RandomAccessReader(os.path.join(string_path_data, string_file_01))
 csv_reader = CsvRandomAccessReader(string_file_air)
 #print('header', csv_reader.headers)
-list_random_lines = random.sample(range(0, csv_reader.number_of_lines), 100000)
+#list_random_lines = random.sample(range(0, csv_reader.number_of_lines), 100000)
 
-list_lines = list()
-for int_line in list_random_lines:
-    list_lines.append(csv_reader.get_line_dicts(int_line))
+#list_lines = list()
+#for int_line in list_random_lines:
+#    list_lines.append(csv_reader.get_line_dicts(int_line))
 #print(list_lines)
 
-df_temp = pandas.DataFrame(data = list_lines, columns = csv_reader.headers)
+df_temp = pandas.DataFrame(data = csv_reader.get_sample(100000), 
+                           columns = csv_reader.headers)
 timer_test.stop_timer('100k test')
 print('stop')
 
