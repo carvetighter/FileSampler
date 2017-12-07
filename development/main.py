@@ -21,9 +21,10 @@ csv_reader = CsvRandomAccessReader(string_file_air)
 #    list_lines.append(csv_reader.get_line_dicts(int_line))
 #print(list_lines)
 
-df_temp = pandas.DataFrame(data = csv_reader.get_sample(100000), 
+df_temp = pandas.DataFrame(data = csv_reader.get_csv_sample(100000), 
                            columns = csv_reader.headers)
 timer_test.stop_timer('100k test')
+print(df_temp.iloc[0])
 print('stop')
 
 #list_lines_txt = txt_reader.get_lines(0)

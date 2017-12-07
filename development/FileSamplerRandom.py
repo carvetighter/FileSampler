@@ -87,20 +87,36 @@ class RandomAccessReader(object):
 
         return int(mean(list_len_100_lines))
 
-    def get_line(self, m_int_line_number, bool_header = False):
+    def _get_line(self, m_int_line_number, m_file):
         """
         get the contents of a given line in the file
         :param line_number: 0-indexed line number
-        :param bool_header: flag to pull first line
         :return: str
         """
-        with open(self._filepath) as f:
-            if bool_header or m_int_line_number == 0:
-                f.seek(m_int_line_number)
-            else:
-                f.seek(m_int_line_number * self._int_avg_len - int(self._int_avg_len / 2))
-                f.readline()
-            return f.readline()
+        if m_int_line_number == 0:
+            m_file.seek(m_int_line_number)
+        else:
+            m_file.seek(m_int_line_number * self._int_avg_len - int(self._int_avg_len / 2))
+            m_file.readline()
+        return m_file.readline()
+
+        def get_txt_sample(self, m_int_num_samples):
+            """
+            gets the requested line as a dictionary (header values are the keys)
+            :param m_int_num_samples: requested line number, 0-indexed (disregards the header line if present)
+            :return: list of tuples
+            """
+            if m_int_num_samples > self._int_num_lines:
+                raise ValueError('Number of samples requested is more than the number of lines in the file')
+
+            list_random_lines = random.sample(range(0, self._int_num_lines), m_int_num_samples)
+        
+            list_lines = []
+            with open(self._filepath) as f:
+                for int_line in list_random_lines:
+                    list_lines.append(self._get_line(int_line, f))
+
+            return list_lines
 
 class CsvRandomAccessReader(RandomAccessReader):
 
@@ -119,7 +135,8 @@ class CsvRandomAccessReader(RandomAccessReader):
         self._ignore_bad_lines = kwargs.get('ignore_corrupt', False)
         self.has_header = has_header
         if has_header:
-            self._headers = self._csv_trans(self.get_line(0, bool_header = True))
+            with open(self._filepath) as f:
+                self._headers = self._csv_trans(self._get_line(0, f))
 
     @property
     def headers(self):
@@ -149,7 +166,7 @@ class CsvRandomAccessReader(RandomAccessReader):
             return None
         return values
 
-    def get_sample(self, m_int_num_samples):
+    def get_csv_sample(self, m_int_num_samples):
         """
         gets the requested line as a dictionary (header values are the keys)
         :param m_int_num_samples: requested line number, 0-indexed (disregards the header line if present)
@@ -164,9 +181,10 @@ class CsvRandomAccessReader(RandomAccessReader):
             list_random_lines = random.sample(range(0, self._int_num_lines), m_int_num_samples)
         
         list_lines = []
-        for int_line in list_random_lines:
-            text_line = self.get_line(int_line)
-            list_lines.append(self._get_line_values(text_line))
+        with open(self._filepath) as f:
+            for int_line in list_random_lines:
+                text_line = self._get_line(int_line, f)
+                list_lines.append(self._get_line_values(text_line))
 
         #vals = self._get_line_values(text_lines[x])
         #if vals is None:
