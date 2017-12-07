@@ -36,8 +36,7 @@ class RandomAccessReader(object):
         self._filepath = filepath
         self._endline = endline_character
         self._ignore_blanks = ignore_blank_lines
-        self._int_num_lines = 123000000
-        #self._int_num_lines = self._count_lines()
+        self._int_num_lines = self._count_lines()
         self._int_avg_len = self._get_avg_len()
 
     @property
@@ -88,20 +87,21 @@ class RandomAccessReader(object):
 
         return int(mean(list_len_100_lines))
 
-    def get_lines(self, line_number, amount = 1):
+    def get_lines(self, line_number, bool_header = False):
         """
         get the contents of a given line in the file
         :param line_number: 0-indexed line number
-        :param amount amount of lines to read
+        :param bool_header: flag to pull first line
         :return: str
         """
         lines = []
         with open(self._filepath) as f:
-            for x in range(0, amount):
+            if bool_header:
+                f.seek(line_number)
+            else:
                 f.seek(line_number * self._int_avg_len)
                 f.readline()
-                lines.append(f.readline())
-            return lines
+            return f.readline()
 
 class CsvRandomAccessReader(RandomAccessReader):
 
@@ -121,7 +121,7 @@ class CsvRandomAccessReader(RandomAccessReader):
         self.has_header = has_header
         if has_header:
             dialect = self.MyDialect(self._endline, self._quotechar, self._delimiter)
-            b = StringIO(self.get_lines(0)[0])
+            b = StringIO(self.get_lines(0, bool_header = True))
             r = csv.reader(b, dialect)
             values = tuple(next(r))
             self._headers = values
@@ -151,11 +151,10 @@ class CsvRandomAccessReader(RandomAccessReader):
             return None
         return values
 
-    def get_line_dicts(self, line_number, amount=1):
+    def get_line_dicts(self, line_number, bool_headers = False):
         """
         gets the requested line as a dictionary (header values are the keys)
         :param line_number: requested line number, 0-indexed (disregards the header line if present)
-        :param amount
         :return: dict
         """
         if not self._headers:
@@ -163,14 +162,13 @@ class CsvRandomAccessReader(RandomAccessReader):
         if self.has_header:
             line_number += 1
         lines = []
-        text_lines = self.get_lines(line_number, amount)
-        for x in range(0, amount):
-            vals = self._get_line_values(text_lines[x])
-            if vals is None:
-                lines.append(dict(zip(self._headers, list(range(len(self._headers))))))
-            else:
-                lines.append(dict(zip(self._headers, vals)))
-        return lines
+        text_line = self.get_lines(line_number)
+            #vals = self._get_line_values(text_lines[x])
+            #if vals is None:
+            #    lines.append(dict(zip(self._headers, list(range(len(self._headers))))))
+            #else:
+            #    lines.append(dict(zip(self._headers, vals)))
+        return self._get_line_values(text_line)
 
     class MyDialect(csv.Dialect):
         strict = True
