@@ -7,6 +7,8 @@
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$# 
 
 import csv
+import random
+from numpy import mean
 from io import StringIO
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
@@ -34,8 +36,9 @@ class RandomAccessReader(object):
         self._filepath = filepath
         self._endline = endline_character
         self._ignore_blanks = ignore_blank_lines
-        self._int_num_lines = self._count_lines()
-        self._lines = self._get_line_data()
+        self._int_num_lines = 123000000
+        #self._int_num_lines = self._count_lines()
+        self._int_avg_len = self._get_avg_len()
 
     @property
     def number_of_lines(self):
@@ -47,28 +50,43 @@ class RandomAccessReader(object):
     def _count_lines(self):
         return sum(1 for line in open(self._filepath))
 
-    def _get_line_data(self):
+    def _get_avg_len(self):
         f = open(self._filepath)
-        lines = []
-        start_position = 0
-        has_more = True
-        current_line = 1
-        while has_more:
-            current = f.read(1)
+        # for the header row
+        f.readline()
 
-            if current == self._endline or current == '':
-                # we've reached the end of the current line
-                if not self._ignore_blanks or current_line > 0:
-                    lines.append({"position": start_position, "length": current_line})
-                start_position += current_line + 1
-                current_line = 1
-                if current == '':
-                    has_more = False
-                continue
+        # read first 10 lines
+        list_lines = []
+        if self._int_num_lines < 11:
+            list_lines.append(len(f.readline()))
+        else:
+            for int_line_num in range(0, 10):
+                    list_lines.append(len(f.readline()))
+        
+        # calc temp mean
+        int_temp_mean = int(mean(list_lines)) + 1
+        
+        # get 100 random lines to test
+        list_random_lines = list()
+        for int_dummy in range(0, 100):
+            list_random_lines.append(random.randint(0, self._int_num_lines - 1))
 
-            current_line += 1
+        # read 100 lines for sampling of average line length
+        list_len_100_lines = list()
+        for int_line_num in list_random_lines:
+            # check for last line last line
+            if int_line_num == self._int_num_lines - 1:
+                int_line_num -= 1
+
+            # go to character in file
+            f.seek(int(int_line_num * int_temp_mean))
+            
+            # read partial line then read entire line
+            f.readline()
+            list_len_100_lines.append(len(f.readline()))
         f.close()
-        return lines
+
+        return int(mean(list_len_100_lines))
 
     def get_lines(self, line_number, amount = 1):
         """
@@ -80,9 +98,9 @@ class RandomAccessReader(object):
         lines = []
         with open(self._filepath) as f:
             for x in range(0, amount):
-                line_data = self._lines[line_number]
-                f.seek(line_data['position'])
-                lines.append(f.read(line_data['length']))
+                f.seek(line_number * self._int_avg_len)
+                f.readline()
+                lines.append(f.readline())
             return lines
 
 class CsvRandomAccessReader(RandomAccessReader):
