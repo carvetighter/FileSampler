@@ -48,7 +48,7 @@ class RandomAccessReader(object):
         lines = []
         start_position = 0
         has_more = True
-        current_line = 0
+        current_line = 1
         while has_more:
             current = f.read(1)
 
@@ -57,7 +57,7 @@ class RandomAccessReader(object):
                 if not self._ignore_blanks or current_line > 0:
                     lines.append({"position": start_position, "length": current_line})
                 start_position += current_line + 1
-                current_line = 0
+                current_line = 1
                 if current == '':
                     has_more = False
                 continue
