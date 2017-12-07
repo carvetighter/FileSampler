@@ -14,7 +14,7 @@ timer_test = Timer()
 #txt_reader = RandomAccessReader(os.path.join(string_path_data, string_file_01))
 csv_reader = CsvRandomAccessReader(string_file_air)
 #print('header', csv_reader.headers)
-list_random_lines = random.sample(range(0, csv_reader.number_of_lines), 10)
+list_random_lines = random.sample(range(0, csv_reader.number_of_lines), 100000)
 
 list_lines = list()
 for int_line in list_random_lines:
