@@ -7,7 +7,8 @@
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$# 
 
 import csv
-import random
+from random import randrange
+from pandas import DataFrame, Series
 from numpy import mean
 from io import StringIO
 
@@ -26,66 +27,122 @@ The goal of these classes is to ramdom sample a file with little overhead.
 RandomAccessReader is the base class for the CsvRandomAccessReader.  
 """
 
-class RandomAccessReader(object):
+class FileSamplerBase(object):
 
-    def __init__(self, filepath, endline_character = '\n', ignore_blank_lines = False):
+    def __init__(self, m_string_filepath, m_string_endline_character = '\n', m_bool_estimate = False):
         """
-        :param filepath:  Absolute path to file
-        :param endline_character: Delimiter for lines. Defaults to newline character (\n)
+        this method initialized the base class for the text file sampler; class will attempt to map the file
+        for the start character of the line and the length of each line; if the file is more than 1 million lines 
+        this method will estimate the length of the line through sampling 1000 rows
+        
+        Requirements:
+        package numpy.mean
+        
+        Inputs:
+        m_string_filepath
+        Type: string
+        Desc: absolute file path, includes file name
+
+        m_string_endline_character
+        Type: string
+        Desc: end of line character for the file
+
+        m_bool_estimate
+        Type: boolean
+        Desc: flag to indicate if the mode of line retrievela is by estimating the line length or 
+            use list of dictionaries for line start position and line length
+        
+        Important Info:
+        None
+        
+        Objects and Properties:
+        _string_filepath
+        Type: string
+        Desc: absolute file path
+
+        _string_endline
+        Type: string
+        Desc: end of line character
+
+        _int_num_lines
+        Type: integer
+        Desc: number of lines in the file
+
+        _int_avg_len
+        Type: integer
+        Desc: average length of the file; only used in estimation of line lenght mode
+
+        _bool_estimate_mode
+        Type: boolean
+        Desc: flag to indicate if the mode of line retrievela is by estimating the line length or 
+            use list of dictionaries for line start position and line length
+
+        _list_line_indexes
+        Type: list of dictionaries
+        Desc: each dictionary contines the character number for the start of the line and the length of the line; 
+            the index of the list is the line number starting at 0; this is only if the number of lines in the file
+            is less than 1 million
+        _list_line_indexes[x] -> {'start': <integer>, 'length':<integer>}
+        
+        eg: _list_line_indexes[3] -> {'start':57, 'length':23}
         """
-        self._filepath = filepath
-        self._endline = endline_character
-        self._ignore_blanks = ignore_blank_lines
-        self._int_num_lines = self._count_lines()
-        self._int_avg_len = self._get_avg_len()
+        self._string_filepath = m_string_filepath
+        self._string_endline = m_string_endline_character
+        self._bool_estimate_mode = m_bool_estimate
+        if self._bool_estimate_mode:
+            self._int_num_lines = self._count_lines()
+            self._int_avg_len = self._get_avg_len()
+            self._list_line_indexes = None
+        else:
+            self._list_line_indexes = self._build_line_indexes()
+            self._int_num_lines = len(self._list_line_indexes)
+            self._int_avg_len = None
 
     @property
     def number_of_lines(self):
         return self._int_num_lines
 
+    @property
+    def estimate_mode(self):
+        return self._bool_estimate_mode
+
     def get_line_indexes(self):
-        return range(len(self._lines))
+        return range(0, len(self._list_line_indexes))
 
     def _count_lines(self):
         return sum(1 for line in open(self._filepath))
 
     def _get_avg_len(self):
-        f = open(self._filepath)
-        # for the header row
-        f.readline()
-
-        # read first 10 lines
-        list_lines = []
-        if self._int_num_lines < 11:
-            list_lines.append(len(f.readline()))
-        else:
+        """
+        """
+        with open(self._string_filepath, 'r') as file:
+            # read first 10 lines
+            list_lines = []
             for int_line_num in range(0, 10):
-                    list_lines.append(len(f.readline()))
+                    list_lines.append(len(file.readline()))
         
-        # calc temp mean
-        int_temp_mean = int(mean(list_lines)) + 1
+            # calc temp mean
+            int_temp_mean = int(mean(list_lines))
         
-        # get 100 random lines to test
-        list_random_lines = list()
-        for int_dummy in range(0, 100):
-            list_random_lines.append(random.randint(0, self._int_num_lines - 1))
+            # get 1000 random lines to test
+            list_random_lines = [randrange(0, self._int_num_lines) for x in range(0, 1000)]
 
-        # read 100 lines for sampling of average line length
-        list_len_100_lines = list()
-        for int_line_num in list_random_lines:
-            # check for last line last line
-            if int_line_num == self._int_num_lines - 1:
-                int_line_num -= 1
-
-            # go to character in file
-            f.seek(int(int_line_num * int_temp_mean))
+            # read 1000 lines for sampling of average line length
+            list_len_1000_lines = list()
+            for int_line_num in list_random_lines:
+                # go to line before random line
+                if int_line_num == 0:
+                    int_line_start = 0
+                else:
+                    int_line_start = int_line_num * int_temp_mean - int(0.5 * int_temp_mean)
+                f.seek(int_line_start)
             
-            # read partial line then read entire line
-            f.readline()
-            list_len_100_lines.append(len(f.readline()))
-        f.close()
+                # read partial line then read entire line
+                if int_line_start != 0:
+                    file.readline()
+                list_len_1000_lines.append(len(file.readline()))
 
-        return int(mean(list_len_100_lines))
+        return int(mean(list_len_1000_lines))
 
     def _get_line(self, m_int_line_number, m_file):
         """
