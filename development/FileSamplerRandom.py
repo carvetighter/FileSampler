@@ -117,7 +117,10 @@ class FileSamplerBase(object):
         return self._bool_estimate_mode
 
     def get_line_indexes(self):
-        return range(0, len(self._list_line_indexes))
+        if self._bool_estimate_mode:
+            return None
+        else:
+            return range(0, len(self._list_line_indexes))
 
     def _count_lines(self):
         return sum(1 for line in open(self._filepath))
@@ -213,95 +216,154 @@ class FileSamplerBase(object):
 
         return list_lines
 
-    def _get_line(self, m_int_line_number, m_file):
-        """
-        get the contents of a given line in the file
-        :param line_number: 0-indexed line number
-        :return: str
-        """
-        if m_int_line_number == 0:
-            m_file.seek(m_int_line_number)
-        else:
-            m_file.seek(m_int_line_number * self._int_avg_len - int(self._int_avg_len / 2))
-            m_file.readline()
-        return m_file.readline()
+class TextSampler(FileSamplerBase):
 
-class CsvRandomAccessReader(RandomAccessReader):
+    def __init__(self, m_string_filepath, bool_has_header, **kwargs):
+        """
+        """
+        super(FileSamplerBase, self).__init__(m_string_filepath,
+                                                                      kwargs.get('m_string_endline_character', '\n'),
+                                                                      kwargs.get('m_bool_estimate', False))
 
-    def __init__(self, filepath, has_header = True, **kwargs):
+    def get_a_line(self, m_int_line_number):
+        """
+        """
+        with open(self._string_filepath, 'r') as file:
+            if self._bool_estimate_mode:
+                if m_int_line_number == 0:
+                    int_line_start = 0
+                else:
+                    int_line_start = m_int_line_number * self._int_avg_len - int(0.5 * self._int_avg_len)
+
+                file.seek(int_line_start)
+                if m_int_line_number != 0:
+                    file.readline()
+                return file.readline()
+            else:
+                dict_line_data = self._list_line_indexes[m_int_line_number]
+                file.seek(dict_line_data['start'])
+                return file.read(dict_line_data['length'])
+
+    def get_lines(self, m_list_line_numbers):
+        """
+        """
+        if len(m_list_line_numbers) > self.number_of_lines:
+            string_error = 'number of lines requested is more than the number of lines in the file;'
+            string_error +=  'length of input list is too long'
+            raise ValueError(string_error)
+
+        list_return = list()
+
+        for int_line in m_list_line_numbers:
+            list_return.append(self.get_a_line(int_line))
+        return list_return
+
+    def get_random_lines(self, m_int_number_of_lines):
+        """
+        """
+        if m_int_number_of_lines > self.number_of_lines:
+            raise ValueError('number of lines requested is more than the number of lines in the file')
+
+        list_line_numbers = [randrange(0, self.number_of_lines) for x in range(0, m_int_number_of_lines)]
+        return self.get_lines(list_line_numbers)
+
+class CsvSampler(TextSampler):
+
+    def __init__(self, m_string_filepath, m_bool_has_header = True, 
+                 m_bool_ignore_bad_lines = False, **kwargs):
         """
         :param filepath:
         :param has_header:
         :param kwargs: endline_character = '\n', values_delimiter = ',', 
         quotechar = '"', ignore_corrupt = False, ignore_blank_lines = True
         """
-        super(CsvRandomAccessReader, self).__init__(filepath, kwargs.get('endline_character','\n'), 
-                                                    kwargs.get('ignore_blank_lines', True))
-        self._headers = None
-        self._delimiter = kwargs.get('values_delimiter', ',')
-        self._quotechar = kwargs.get('quotechar', '"')
-        self._ignore_bad_lines = kwargs.get('ignore_corrupt', False)
-        self.has_header = has_header
+        super(TextSampler, self).__init__(m_string_filepath, 
+                                                              kwargs.get('m_string_endline_character','\n'), 
+                                                              kwargs.get('m_bool_estimate', False))
+        self._tuple_header = None
+        self._string_delimiter = kwargs.get('values_delimiter', ',')
+        self._string_quotechar = kwargs.get('quotechar', '"')
+        self._bool_has_header = m_bool_has_header
+        self._bool_ignore_bad_lines = m_bool_ignore_bad_lines
+        
         if has_header:
-            with open(self._filepath) as f:
-                self._headers = self._csv_trans(self._get_line(0, f))
+            self._tuple_header = self._csv_trans(self.get_a_line(0))
 
     @property
-    def headers(self):
-        return self._headers
+    def header(self):
+        return self._tuple_header
+
+    @property
+    def has_header(self):
+        return self._bool_has_header
+
+    def _csv_trans(self, m_string_line):
+        """
+        """
+        dialect = self.MyDialect(self._string_endline, self._string_quotechar, self._string_delimiter)
+        b = StringIO(m_string_line)
+        r = csv.reader(b, dialect)
+        return tuple(next(r))
+
+    def _parse_csv_values(self, m_string_line):
+        """
+        """
+        values = self._csv_trans(m_string_line)
+        if len(self._headers) != len(values):
+            if not self._bool_ignore_bad_lines:
+                raise ValueError("Corrupt csv - header and row have different lengths")
+            return None
+        return values
 
     def set_headers(self, header_list):
         if not hasattr(header_list, '__iter__'):
             raise TypeError("Argument 'header_list' must contain an iterable")
         self._headers = tuple(header_list)
 
-    def _csv_trans(self, string_line):
-        dialect = self.MyDialect(self._endline, self._quotechar, self._delimiter)
-        b = StringIO(string_line)
-        r = csv.reader(b, dialect)
-        return tuple(next(r))
+    def get_a_csv_line(self, m_int_line_number):
+        """
+        """
+        if self.has_header:
+            m_int_line_number += 1
+        
+        string_line = self.get_a_line(m_int_line_number)
+        tup_values = self._parse_csv_values(string_line)
+        
+        if self.has_header:
+            return Series(data = tup_values, index = self.header)
+        else:
+            return Series(data = tup_values)
 
-    def _get_line_values(self, line):
+    def get_csv_lines(self, m_list_line_numbers):
         """
-        Splits the csv line into a list of individual values
-        :param line: str
-        :return: tuple of str
         """
-        values = self._csv_trans(line)
-        if len(self._headers) != len(values):
-            if not self._ignore_bad_lines:
-                raise ValueError("Corrupt csv - header and row have different lengths")
-            return None
-        return values
+        if len(m_list_line_numbers) > self.number_of_lines:
+            string_error = 'number of lines requested is more than the number of lines in the file;'
+            string_error +=  'length of input list is too long'
+            raise ValueError(string_error)
 
-    def get_csv_sample(self, m_int_num_samples):
-        """
-        gets the requested line as a dictionary (header values are the keys)
-        :param m_int_num_samples: requested line number, 0-indexed (disregards the header line if present)
-        :return: list of tuples
-        """
-        if m_int_num_samples > self._int_num_lines:
-            raise ValueError('Number of samples requested is more than the number of lines in the file')
+        list_data = list()
+        list_lines = self.get_lines(m_list_line_numbers)
+        for string_line in list_lines:
+            list_data.append(self._parse_csv_values(string_line))
 
         if self.has_header:
-            list_random_lines = random.sample(range(1, self._int_num_lines), m_int_num_samples)
+            return DataFrame(data = list_data, columns = self.header)
         else:
-            list_random_lines = random.sample(range(0, self._int_num_lines), m_int_num_samples)
-        
-        list_lines = []
-        with open(self._filepath) as f:
-            for int_line in list_random_lines:
-                text_line = self._get_line(int_line, f)
-                list_lines.append(self._get_line_values(text_line))
+            return DataFrame(data = list_data)
 
-        #vals = self._get_line_values(text_lines[x])
-        #if vals is None:
-        #    lines.append(dict(zip(self._headers, list(range(len(self._headers))))))
-        #else:
-        #    lines.append(dict(zip(self._headers, vals)))
-        return list_lines
+    def get_csv_random_lines(self, m_int_num_lines):
+        """
+        """
+        if m_int_num_lines > self.number_of_lines:
+            raise ValueError('Number of lines requestes is greater than the number of lines in the file')
+
+        list_line_numbers = [randrange(0, self.number_of_lines) for x in range(0, m_int_num_lines)]
+        return self.get_csv_lines(list_line_numbers)
 
     class MyDialect(csv.Dialect):
+        """
+        """
         strict = True
         skipinitialspace = True
         quoting = csv.QUOTE_ALL
