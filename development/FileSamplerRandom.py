@@ -89,14 +89,24 @@ class FileSamplerBase(object):
         self._string_filepath = m_string_filepath
         self._string_endline = m_string_endline_character
         self._bool_estimate_mode = m_bool_estimate
+
         if self._bool_estimate_mode:
             self._int_num_lines = self._count_lines()
             self._int_avg_len = self._get_avg_len()
             self._list_line_indexes = None
         else:
-            self._list_line_indexes = self._build_line_indexes()
-            self._int_num_lines = len(self._list_line_indexes)
-            self._int_avg_len = None
+            try:
+                self._list_line_indexes = self._build_line_indexes()
+            except AttributeError as ae:
+                self._int_num_lines = self._count_lines()
+                self._int_avg_len = self._get_avg_len()
+                self._list_line_indexes = None
+                self._bool_estimate_mode = True
+            else:
+                self._int_num_lines = len(self._list_line_indexes)
+                self._int_avg_len = None
+            finally:
+                pass
 
     @property
     def number_of_lines(self):
@@ -114,6 +124,23 @@ class FileSamplerBase(object):
 
     def _get_avg_len(self):
         """
+        this method calculates the an average line length by sampling 1000 random lines from the file
+    
+        Requirements:
+        package numpy.mean
+    
+        Inputs:
+        None
+        Type: n/a
+        Desc: n/a
+        
+        Important Info:
+        None
+    
+        Return:
+        variable
+        Type: integer
+        Desc: average length of the sample of lines
         """
         with open(self._string_filepath, 'r') as file:
             # read first 10 lines
@@ -144,6 +171,48 @@ class FileSamplerBase(object):
 
         return int(mean(list_len_1000_lines))
 
+    def _build_line_indexes(self):
+        """
+        this method calculates the character index, integer, of the start of the line and the line length of each line
+        in the file; if the file is more than 1 million rows the method will only count the number of rows and switch
+        to an estimation mode
+    
+        Requirements:
+        None
+    
+        Inputs:
+        None
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: list of dictionaries
+        Desc: each dictionary contines the character number for the start of the line and the length of the line; 
+            the index of the list is the line number starting at 0; this is only if the number of lines in the file
+            is less than 1 million
+        _list_line_indexes[x] -> {'start': <integer>, 'length':<integer>}
+        
+        eg: _list_line_indexes[3] -> {'start':57, 'length':23}
+        """
+        list_lines = list()
+        int_line_count = 1
+        int_start_posit = 0
+
+        with open(self._string_filepath, 'r') as file:
+            for string_line in file:
+                int_line_length = len(string_line)
+                list_lines.append({'start':int_start_posit, 'length':int_line_length})
+                int_start_posit += int_line_length
+
+                # check line count
+                if int_line_count > 1000000:
+                    raise AttributeError('surpassed line count threashold; 1000000')
+                int_line_count += 1
+
+        return list_lines
+
     def _get_line(self, m_int_line_number, m_file):
         """
         get the contents of a given line in the file
@@ -156,24 +225,6 @@ class FileSamplerBase(object):
             m_file.seek(m_int_line_number * self._int_avg_len - int(self._int_avg_len / 2))
             m_file.readline()
         return m_file.readline()
-
-        def get_txt_sample(self, m_int_num_samples):
-            """
-            gets the requested line as a dictionary (header values are the keys)
-            :param m_int_num_samples: requested line number, 0-indexed (disregards the header line if present)
-            :return: list of tuples
-            """
-            if m_int_num_samples > self._int_num_lines:
-                raise ValueError('Number of samples requested is more than the number of lines in the file')
-
-            list_random_lines = random.sample(range(0, self._int_num_lines), m_int_num_samples)
-        
-            list_lines = []
-            with open(self._filepath) as f:
-                for int_line in list_random_lines:
-                    list_lines.append(self._get_line(int_line, f))
-
-            return list_lines
 
 class CsvRandomAccessReader(RandomAccessReader):
 
