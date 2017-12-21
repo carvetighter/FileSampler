@@ -1,5 +1,5 @@
-from FileSamplerRandom import CsvRandomAccessReader
-from FileSamplerRandom import RandomAccessReader
+from FileSampler import TextSampler
+from FileSampler import CsvSampler
 import os
 import random
 import pandas

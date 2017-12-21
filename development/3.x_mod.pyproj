@@ -27,7 +27,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="class_template.py" />
-    <Compile Include="FileSamplerRandom.py" />
+    <Compile Include="FileSampler.py" />
     <Compile Include="main.py">
       <SubType>Code</SubType>
     </Compile>
