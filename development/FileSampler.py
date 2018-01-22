@@ -1,3 +1,32 @@
+"""
+This is the pythone class file for FileSamplerBase, TextSampler and CSVSampler.  These classes make up
+the classes needed to sample files at random.  This will help if there is not enough memory to fit into a
+DataFrame or Numpy array.  The goal of this project is to be able to efficeintly and effectively sample very
+large files.
+
+If the file is over 1 million lines the class will estimate the line length for data / line reteival.  If the file is less 
+than 1 million lines a dictionary is used to track the line length and first position of the line in the file.  At about 
+a million lines the dictionary takes up about ~80 MB of space. 
+
+GitHub Repo: https://github.com/carvetighter/FileSampler
+
+Basic Usage:
+from FileSampler import TextSampler
+from FileSampler import CsvSampler
+import pandas
+
+# Text file sampling
+txt_reader = RandomAccessReader(string_file) # must include path if not in home directory
+
+string_single_line = txt_reader.get_a_line(33) # retrieves the 33rd line of the file
+list_multiple_lines = txt_reader.get_lines([5, 15, 33, 789]) # retrieves the 4 lines from the file
+list_random_lines = txt_reader.get_random_lines(15) # retrieves 15 random lines; this is sample with replacement
+
+# Csv file sampling
+csv_reader = CsvRandomAccessReader(string_file) # must include path if not in home directory
+
+"""
+
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 #
@@ -20,12 +49,7 @@ from io import StringIO
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 
-"""
-This script contains two classes RandomAccessReader and CsvRandomAccessReader.
 
-The goal of these classes is to ramdom sample a file with little overhead.  
-RandomAccessReader is the base class for the CsvRandomAccessReader.  
-"""
 
 class FileSamplerBase(object):
 
@@ -226,8 +250,25 @@ class TextSampler(FileSamplerBase):
                                                                       kwargs.get('m_bool_estimate', False))
 
     def get_a_line(self, m_int_line_number):
-        """
-        """
+        '''
+        this method will recreive a line from the text file
+    
+        Requirements:
+        class FileSamplerBase
+    
+        Inputs:
+        m_int_line_number
+        Type: int
+        Desc: line number of the file
+        
+        Important Info:
+        None
+    
+        Return:
+        variable
+        Type: string
+        Desc: line desired from the text file
+        '''
         with open(self._string_filepath, 'r') as file:
             if self._bool_estimate_mode:
                 if m_int_line_number == 0:
@@ -245,8 +286,25 @@ class TextSampler(FileSamplerBase):
                 return file.read(dict_line_data['length'])
 
     def get_lines(self, m_list_line_numbers):
-        """
-        """
+        '''
+        this method will recreive multiple lines from the text file
+    
+        Requirements:
+        class FileSamplerBase
+    
+        Inputs:
+        m_list_line_numbers
+        Type: list
+        Desc: integers of lines to retrieve
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: list
+        Desc: strings represent the lines desired in text file
+        '''
         if len(m_list_line_numbers) > self.number_of_lines:
             string_error = 'number of lines requested is more than the number of lines in the file;'
             string_error +=  'length of input list is too long'
@@ -259,8 +317,25 @@ class TextSampler(FileSamplerBase):
         return list_return
 
     def get_random_lines(self, m_int_number_of_lines):
-        """
-        """
+        '''
+        this method will recreive random lines from the text file; this is random sampling with replacement
+    
+        Requirements:
+        class FileSamplerBase
+    
+        Inputs:
+        m_int_number_of_lines
+        Type: int
+        Desc: number of random lines to pull from file
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: list
+        Desc: strings represent the lines desired in text file
+        '''
         if m_int_number_of_lines > self.number_of_lines:
             raise ValueError('number of lines requested is more than the number of lines in the file')
 
