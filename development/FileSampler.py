@@ -49,8 +49,6 @@ from io import StringIO
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 
-
-
 class FileSamplerBase(object):
 
     def __init__(self, m_string_filepath, m_string_endline_character = '\n', m_bool_estimate = False):
@@ -402,6 +400,23 @@ class CsvSampler(TextSampler):
 
     def _parse_csv_values(self, m_string_line):
         """
+        this method converts a text line into a csv line which is a tuple
+    
+        Requirements:
+        None
+    
+        Inputs:
+        m_string_line
+        Type: string
+        Desc: line to translate into a csv format
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: tuple
+        Desc: line split into segments based on csv format
         """
         values = self._csv_trans(m_string_line)
         if len(self._headers) != len(values):
@@ -411,12 +426,50 @@ class CsvSampler(TextSampler):
         return values
 
     def set_headers(self, header_list):
+        """
+        this method sets the header, which is a tuple
+    
+        Requirements:
+        None
+    
+        Inputs:
+        header_list
+        Type: list or iterator
+        Desc: column header
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: tuple
+        Desc: columns for the csv file
+        """
         if not hasattr(header_list, '__iter__'):
             raise TypeError("Argument 'header_list' must contain an iterable")
         self._headers = tuple(header_list)
 
     def get_a_csv_line(self, m_int_line_number):
         """
+        this method finds a line in the csv file and returns a pandas
+        series with the column names as the index; if there is not header
+        the series index will not have the column names
+    
+        Requirements:
+        package pandas.Series
+    
+        Inputs:
+        m_int_line_number
+        Type: int
+        Desc: the line number to pull from the file
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: pandas Series
+        Desc: the line as a pandas series
         """
         if self.has_header:
             m_int_line_number += 1
@@ -431,6 +484,25 @@ class CsvSampler(TextSampler):
 
     def get_csv_lines(self, m_list_line_numbers):
         """
+        this method finds multiple lines that are identified by the
+        line numbers in the list passed to the method; if there is no
+        header the dataframe will not have column names, only numbers
+    
+        Requirements:
+        package pandas.DataFrame
+    
+        Inputs:
+        m_list_line_numbers
+        Type: list
+        Desc: integers which indicate the line numbers of the file to retreive
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: pandas DataFrame
+        Desc: dataframe with the lines in the columns
         """
         if len(m_list_line_numbers) > self.number_of_lines:
             string_error = 'number of lines requested is more than the number of lines in the file;'
@@ -449,6 +521,24 @@ class CsvSampler(TextSampler):
 
     def get_csv_random_lines(self, m_int_num_lines):
         """
+        this method finds multiple lines in the file but are genearted
+        randomly
+    
+        Requirements:
+        package random.randrange
+    
+        Inputs:
+        m_int_num_lines
+        Type: int
+        Desc: number of random lines to pull from the file
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: pandas DataFrame
+        Desc: dataframe with of the lines from the csv file
         """
         if m_int_num_lines > self.number_of_lines:
             raise ValueError('Number of lines requestes is greater than the number of lines in the file')
@@ -458,6 +548,19 @@ class CsvSampler(TextSampler):
 
     class MyDialect(csv.Dialect):
         """
+        this class is a wrapper for a csv dialect which will be the format
+        to parse a line from a csv file
+    
+        Requirements:
+        package csv
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: csv dialect
+        Desc: the engine to translate the text line to
         """
         strict = True
         skipinitialspace = True
