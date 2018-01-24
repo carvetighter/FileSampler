@@ -1,3 +1,4 @@
 # ignore directories
 development/__pycache__/*
 development/.vs/*
+development/.vscode/*

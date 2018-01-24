@@ -344,7 +344,7 @@ class TextSampler(FileSamplerBase):
 
 class CsvSampler(TextSampler):
 
-    def __init__(self, m_string_filepath, m_bool_has_header = True, 
+    def __init__(self, m_string_filepath, m_bool_has_header = True,
                  m_bool_ignore_bad_lines = False, **kwargs):
         """
         :param filepath:
@@ -353,8 +353,8 @@ class CsvSampler(TextSampler):
         quotechar = '"', ignore_corrupt = False, ignore_blank_lines = True
         """
         super(TextSampler, self).__init__(m_string_filepath, 
-                                                              kwargs.get('m_string_endline_character','\n'), 
-                                                              kwargs.get('m_bool_estimate', False))
+            kwargs.get('m_string_endline_character','\n'), 
+            kwargs.get('m_bool_estimate', False))
         self._tuple_header = None
         self._string_delimiter = kwargs.get('values_delimiter', ',')
         self._string_quotechar = kwargs.get('quotechar', '"')
@@ -374,8 +374,28 @@ class CsvSampler(TextSampler):
 
     def _csv_trans(self, m_string_line):
         """
+        this method supports the transition of the text line in the csv format
+    
+        Requirements:
+        package MyDialect
+        package csv
+        package io.StringIO
+    
+        Inputs:
+        m_string_line
+        Type: string
+        Desc: line to translate into a csv format
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: tuple
+        Desc: line split into segments based on the dialect
         """
-        dialect = self.MyDialect(self._string_endline, self._string_quotechar, self._string_delimiter)
+        dialect = self.MyDialect(self._string_endline, self._string_quotechar,
+                    self._string_delimiter)
         b = StringIO(m_string_line)
         r = csv.reader(b, dialect)
         return tuple(next(r))
