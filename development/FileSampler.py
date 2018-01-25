@@ -171,7 +171,7 @@ class FileSamplerBase(object):
             # read first 10 lines
             list_lines = []
             for int_line_num in range(0, 10):
-                    list_lines.append(len(file.readline()))
+                list_lines.append(len(file.readline()))
         
             # calc temp mean
             int_temp_mean = int(mean(list_lines))
