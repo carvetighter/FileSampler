@@ -351,8 +351,8 @@ class CsvSampler(TextSampler):
         :param kwargs: endline_character = '\n', values_delimiter = ',', 
         quotechar = '"', ignore_corrupt = False, ignore_blank_lines = True
         """
-        dict_args = {'m_string_endline_character':kwargs.get('m_string_endline_character','\n'),
-                     'm_bool_estimate':kwargs.get('m_bool_estimate', False)}
+        dict_args = {'m_string_endline_character': kwargs.get('m_string_endline_character', '\n'),
+                     'm_bool_estimate': kwargs.get('m_bool_estimate', False)}
 
 
         super(CsvSampler, self).__init__(m_string_filepath, **dict_args)
