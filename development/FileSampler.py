@@ -243,6 +243,25 @@ class TextSampler(FileSamplerBase):
 
     def __init__(self, m_string_filepath, **kwargs):
         """
+        this method initialized the class for TextSampler; it call the super() for this class, FileSamplerBase;
+
+        
+        Requirements:
+        class FileSamplerBase
+        
+        Inputs:
+        m_string_filepath
+        Type: string
+        Desc: absolute file path, includes file name
+
+        kwargs
+        Type: dictionary
+        Desc: parameters to pass to FileSamplerBase
+        m_string_endline_character -> type: string; the endline character for the csv engine
+        m_bool_estimate -> type: boolean; flag to toggle estimate mode
+        
+        Important Info:
+        None
         """
         super().__init__(m_string_filepath,
                                    kwargs.get('m_string_endline_character', '\n'),
@@ -346,14 +365,56 @@ class CsvSampler(TextSampler):
     def __init__(self, m_string_filepath, m_bool_has_header = True,
                  m_bool_ignore_bad_lines = False, **kwargs):
         """
-        :param filepath:
-        :param has_header:
-        :param kwargs: endline_character = '\n', values_delimiter = ',', 
-        quotechar = '"', ignore_corrupt = False, ignore_blank_lines = True
+        this method initialized CsvSampler class, which calls the super() class, TextSampler();
+        
+        Requirements:
+        class TextSampler()
+        
+        Inputs:
+        m_string_filepath
+        Type: string
+        Desc: absolute file path, includes file name
+
+        m_bool_has_header
+        Type: boolean
+        Desc: flag to toggle parsing the header
+
+        m_bool_ignore_bad_lines
+        Type: boolean
+        Desc: flag to toggle the check the length of the data line is the same length as the header
+
+        kwargs
+        Type: dictionary
+        Desc: parameters to pass to TextSampler() if desired
+        m_string_endline_character -> type: string; the endline character for the csv engine
+        m_bool_estimate -> type: boolean; flag to toggle estimate mode
+        
+        Important Info:
+        None
+        
+        Objects and Properties:
+        _tuple_header
+        Type: tuple
+        Desc: header from the csv file
+
+        _string_delimiter
+        Type: string
+        Desc: column delimiter in csv file
+
+        _string_quotechar
+        Type: string
+        Desc: quote character for csv file
+
+        _bool_has_header
+        Type: boolean
+        Desc: flag to indicate of csv file has header
+
+        _bool_ignore_bad_lines
+        Type: boolean
+        Desc: flag to toggle the check if the data line is the same length as the header
         """
         dict_args = {'m_string_endline_character': kwargs.get('m_string_endline_character', '\n'),
                      'm_bool_estimate': kwargs.get('m_bool_estimate', False)}
-
 
         super(CsvSampler, self).__init__(m_string_filepath, **dict_args)
         self._tuple_header = None
