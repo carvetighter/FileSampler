@@ -51,7 +51,8 @@ from io import StringIO
 
 class FileSamplerBase(object):
 
-    def __init__(self, m_string_filepath, m_string_endline_character = '\n', m_bool_estimate = False):
+    def __init__(self, m_string_filepath, m_string_endline_character = '\n', 
+        m_bool_estimate = False):
         """
         this method initialized the base class for the text file sampler; class will attempt to map the file
         for the start character of the line and the length of each line; if the file is more than 1 million lines 
@@ -229,7 +230,7 @@ class FileSamplerBase(object):
             for string_line in file:
                 int_line_length = len(string_line)
                 list_lines.append({'start':int_start_posit, 'length':int_line_length})
-                int_start_posit += int_line_length
+                int_start_posit += int_line_length + 1
 
                 # check line count
                 if int_line_count > 1000000:
@@ -240,12 +241,12 @@ class FileSamplerBase(object):
 
 class TextSampler(FileSamplerBase):
 
-    def __init__(self, m_string_filepath, bool_has_header, **kwargs):
+    def __init__(self, m_string_filepath, **kwargs):
         """
         """
-        super(FileSamplerBase, self).__init__(m_string_filepath,
-                                                                      kwargs.get('m_string_endline_character', '\n'),
-                                                                      kwargs.get('m_bool_estimate', False))
+        super().__init__(m_string_filepath,
+                                   kwargs.get('m_string_endline_character', '\n'),
+                                   kwargs.get('m_bool_estimate', False))
 
     def get_a_line(self, m_int_line_number):
         '''
@@ -350,16 +351,18 @@ class CsvSampler(TextSampler):
         :param kwargs: endline_character = '\n', values_delimiter = ',', 
         quotechar = '"', ignore_corrupt = False, ignore_blank_lines = True
         """
-        super(TextSampler, self).__init__(m_string_filepath, 
-            kwargs.get('m_string_endline_character','\n'), 
-            kwargs.get('m_bool_estimate', False))
+        dict_args = {'m_string_endline_character':kwargs.get('m_string_endline_character','\n'),
+                     'm_bool_estimate':kwargs.get('m_bool_estimate', False)}
+
+
+        super(CsvSampler, self).__init__(m_string_filepath, **dict_args)
         self._tuple_header = None
         self._string_delimiter = kwargs.get('values_delimiter', ',')
         self._string_quotechar = kwargs.get('quotechar', '"')
         self._bool_has_header = m_bool_has_header
         self._bool_ignore_bad_lines = m_bool_ignore_bad_lines
-        
-        if has_header:
+
+        if self.has_header:
             self._tuple_header = self._csv_trans(self.get_a_line(0))
 
     @property
@@ -419,7 +422,7 @@ class CsvSampler(TextSampler):
         Desc: line split into segments based on csv format
         """
         values = self._csv_trans(m_string_line)
-        if len(self._headers) != len(values):
+        if len(self.header) != len(values):
             if not self._bool_ignore_bad_lines:
                 raise ValueError("Corrupt csv - header and row have different lengths")
             return None
