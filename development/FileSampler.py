@@ -50,6 +50,9 @@ from io import StringIO
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 
 class FileSamplerBase(object):
+    """
+    base class
+    """
 
     def __init__(self, m_string_filepath, m_string_endline_character = '\n', 
         m_bool_estimate = False):
@@ -240,6 +243,9 @@ class FileSamplerBase(object):
         return list_lines
 
 class TextSampler(FileSamplerBase):
+    """
+    TextSampler class
+    """
 
     def __init__(self, m_string_filepath, **kwargs):
         """
@@ -361,6 +367,9 @@ class TextSampler(FileSamplerBase):
         return self.get_lines(list_line_numbers)
 
 class CsvSampler(TextSampler):
+    """
+    CsvSampler class
+    """
 
     def __init__(self, m_string_filepath, m_bool_has_header = True,
                  m_bool_ignore_bad_lines = False, **kwargs):
