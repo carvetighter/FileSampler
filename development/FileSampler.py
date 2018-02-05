@@ -305,7 +305,16 @@ class TextSampler(FileSamplerBase):
     TextSampler class
 
     __init__():
-    constructor, 
+    constructor, takes the file path and the inputes for the base class
+
+    get_a_line():
+    retrieves one line from the text file, returns a string
+
+    get_lines():
+    retieves multiple lines from the text file, returns a list of strings
+
+    get_random_lines():
+    retrieves random lines from the text file, returns a list of strings
     """
 
     def __init__(self, m_string_filepath, **kwargs):
@@ -429,6 +438,16 @@ class TextSampler(FileSamplerBase):
 class CsvSampler(TextSampler):
     """
     CsvSampler class
+
+    __init__():
+    constructor, takes the file path, flag to toggle if the csv file has a header, flag to toggle 
+    ignoring bad lines; inputs for the TextSampler and base classes through keywords
+
+    header
+    property, returns the header of the csv file if it exists
+
+    has_header
+    property, returns boolean if the file has a header
     """
 
     def __init__(self, m_string_filepath, m_bool_has_header=True,
