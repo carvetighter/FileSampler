@@ -1,12 +1,12 @@
 """
-This is the pythone class file for FileSamplerBase, TextSampler and CSVSampler.  These classes make up
-the classes needed to sample files at random.  This will help if there is not enough memory to fit into a
-DataFrame or Numpy array.  The goal of this project is to be able to efficeintly and effectively sample very
-large files.
+This is the pythone class file for FileSamplerBase, TextSampler and CSVSampler.  These classes 
+make up the classes needed to sample files at random.  This will help if there is not enough memory 
+to fit into a DataFrame or Numpy array.  The goal of this project is to be able to efficeintly and 
+effectively sample very large files.
 
-If the file is over 1 million lines the class will estimate the line length for data / line reteival.  If the file is less 
-than 1 million lines a dictionary is used to track the line length and first position of the line in the file.  At about 
-a million lines the dictionary takes up about ~80 MB of space. 
+If the file is over 1 million lines the class will estimate the line length for data / line reteival.  If the 
+file is less than 1 million lines a dictionary is used to track the line length and first position of 
+the line in the file.  At about a million lines the dictionary takes up about ~80 MB of space. 
 
 GitHub Repo: https://github.com/carvetighter/FileSampler
 
@@ -20,10 +20,16 @@ txt_reader = RandomAccessReader(string_file) # must include path if not in home 
 
 string_single_line = txt_reader.get_a_line(33) # retrieves the 33rd line of the file
 list_multiple_lines = txt_reader.get_lines([5, 15, 33, 789]) # retrieves the 4 lines from the file
-list_random_lines = txt_reader.get_random_lines(15) # retrieves 15 random lines; this is sample with replacement
+list_random_lines = txt_reader.get_random_lines(15) # retrieves 15 random lines;
+    this is sample with replacement
 
 # Csv file sampling
 csv_reader = CsvRandomAccessReader(string_file) # must include path if not in home directory
+
+series_csv_line = csv_reader.get_a_line(33) # retrieves the 33rd line of the csv file
+dataframe_csv_lines = csv_reader.get_lines([5, 15, 33, 789]) # retrieves the 4 lines from the csv file
+dataframe_csv_random_lines = csv_reader.get_random_lines(15) # retrieves 15 random lines;
+    this is sample with replacement
 """
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
@@ -448,6 +454,24 @@ class CsvSampler(TextSampler):
 
     has_header
     property, returns boolean if the file has a header
+
+    set_headers():
+    sets the headers of the csv
+
+    get_a_csv_line():
+    retrieves one line from the csv file, returns pandas series
+
+    get_csv_lines():
+    retreives multiple lines from the csv file, returns pandas dataframe
+    
+    get_csv_random_lines():
+    retreives random lines from the csv file, returns pandas dataframe
+
+    _csv_trans():
+    supports the decoding of the csv line to a string
+
+    _parse_csv_values():
+    converts the text line of csv, returns a tuple
     """
 
     def __init__(self, m_string_filepath, m_bool_has_header=True,
