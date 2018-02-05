@@ -16,7 +16,7 @@ from FileSampler import CsvSampler
 import pandas
 
 # Text file sampling
-txt_reader = RandomAccessReader(string_file) # must include path if not in home directory
+txt_reader = TextSampler(string_file) # must include path if not in home directory
 
 string_single_line = txt_reader.get_a_line(33) # retrieves the 33rd line of the file
 list_multiple_lines = txt_reader.get_lines([5, 15, 33, 789]) # retrieves the 4 lines from the file
@@ -24,7 +24,7 @@ list_random_lines = txt_reader.get_random_lines(15) # retrieves 15 random lines;
     this is sample with replacement
 
 # Csv file sampling
-csv_reader = CsvRandomAccessReader(string_file) # must include path if not in home directory
+csv_reader = CsvSampler(string_file) # must include path if not in home directory
 
 series_csv_line = csv_reader.get_a_line(33) # retrieves the 33rd line of the csv file
 dataframe_csv_lines = csv_reader.get_lines([5, 15, 33, 789]) # retrieves the 4 lines from the csv file
