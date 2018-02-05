@@ -24,7 +24,6 @@ list_random_lines = txt_reader.get_random_lines(15) # retrieves 15 random lines;
 
 # Csv file sampling
 csv_reader = CsvRandomAccessReader(string_file) # must include path if not in home directory
-
 """
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
@@ -51,7 +50,28 @@ from io import StringIO
 
 class FileSamplerBase(object):
     """
-    base class
+    __init__():
+    constructor for the base class, wil attemp to map the text file or csv if the flag
+    m_bool_estimate is False, if the flag is True a sampling of the file will occur to
+    estimate the file length
+
+    num_of_lies
+    property, the number of lines in the file
+
+    estimate_mode
+    property, flag to indicate if line length is estimateted or counted
+
+    get_line_indexes():
+    returns a list of line indexes
+
+    _count_lines():
+    returns the number of lines in the file
+
+    _get_avg_len():
+    calculates the average length of a sampling of lines
+
+    _build_line_indexes():
+    builds the line indexes, returns a list of dictionaries
     """
 
     def __init__(self, m_string_filepath, m_string_endline_character = '\n', 
@@ -143,12 +163,50 @@ class FileSamplerBase(object):
         return self._bool_estimate_mode
 
     def get_line_indexes(self):
+        """
+        returns the line indexs, which are a list of dictionaries
+        
+        Requirements:
+        None
+    
+        Inputs:
+        None
+        Type: n/a
+        Desc: n/a
+        
+        Important Info:
+        None
+    
+        Return:
+        object
+        Type: range object
+        Desc: object to iterate through the line indexes
+        """
         if self._bool_estimate_mode:
             return None
         else:
             return range(0, len(self._list_line_indexes))
 
     def _count_lines(self):
+        """
+        counts the number of lines in the file
+        
+        Requirements:
+        None
+    
+        Inputs:
+        None
+        Type: n/a
+        Desc: n/a
+        
+        Important Info:
+        None
+    
+        Return:
+        variable
+        Type: integer
+        Desc: number of lines in the file
+        """
         return sum(1 for line in open(self._filepath))
 
     def _get_avg_len(self):
@@ -202,9 +260,9 @@ class FileSamplerBase(object):
 
     def _build_line_indexes(self):
         """
-        this method calculates the character index, integer, of the start of the line and the line length of each line
-        in the file; if the file is more than 1 million rows the method will only count the number of rows and switch
-        to an estimation mode
+        this method calculates the character index, integer, of the start of the line and the line length of 
+        each line in the file; if the file is more than 1 million rows the method will only count the number
+        of rowsand switch to an estimation mode
     
         Requirements:
         None
@@ -245,12 +303,14 @@ class FileSamplerBase(object):
 class TextSampler(FileSamplerBase):
     """
     TextSampler class
+
+    __init__():
+    constructor, 
     """
 
     def __init__(self, m_string_filepath, **kwargs):
         """
         this method initialized the class for TextSampler; it call the super() for this class, FileSamplerBase;
-
         
         Requirements:
         class FileSamplerBase
@@ -371,14 +431,14 @@ class CsvSampler(TextSampler):
     CsvSampler class
     """
 
-    def __init__(self, m_string_filepath, m_bool_has_header = True,
-                 m_bool_ignore_bad_lines = False, **kwargs):
+    def __init__(self, m_string_filepath, m_bool_has_header=True,
+                m_bool_ignore_bad_lines = False, **kwargs):
         """
         this method initialized CsvSampler class, which calls the super() class, TextSampler();
-        
+
         Requirements:
         class TextSampler()
-        
+
         Inputs:
         m_string_filepath
         Type: string
@@ -397,10 +457,10 @@ class CsvSampler(TextSampler):
         Desc: parameters to pass to TextSampler() if desired
         m_string_endline_character -> type: string; the endline character for the csv engine
         m_bool_estimate -> type: boolean; flag to toggle estimate mode
-        
+
         Important Info:
         None
-        
+
         Objects and Properties:
         _tuple_header
         Type: tuple
