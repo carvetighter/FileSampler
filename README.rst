@@ -21,23 +21,38 @@ Usage
 
 ::
 
-    from randomAccessReader import RandomAccessReader
+    from FileSamper import TextSamper
 
-    reader = RandomAccessReader('~/myfile.txt')
+    sampler_text = TextSampler('c:\file path\text_file.txt')
 
     # single line
-    line = reader.get_lines(2)[0]
-    print line
+    string_line = sampler_text.get_a_line(int_line_number)
+    print(string_line)
 
     # multiple lines
-    lines = reader.get_lines(3, 3)
-    for l in lines:
-        print l
+    list_lines = sampler_text.get_lines(list_line_numbers)
+    for line in list_lines:
+        print(line)
+
+    # random lines
+    list_random_lines = sampler_text.get_random_lines(int_number_of_lines)
+    for line in list_random_lines:
+        print(line)
 
 | Optional arguments in the constructor:
 
 - ``endline_character`` - self-explanatory (default is endline character ``\n``)
 - ``ignore_blank_lines`` - if set to ``True``, blank lines in the file will not be read or indexed (default is ``False``)
+
+|
+| Each instance of a TextSampler or CsvSamper class has the properies:
+
+- number_of_lines -> type: int; returns the number of lines in the file
+- estimate_mode -> type: bool; flag if the class counted all the line lenghts in the
+file or estimated the line length based on a sample
+
+|
+| Each 
 
 |
 | **Csv example:**
