@@ -61,7 +61,7 @@ class FileSamplerBase(object):
     m_bool_estimate is False, if the flag is True a sampling of the file will occur to
     estimate the file length
 
-    num_of_lies
+    num_of_lines
     property, the number of lines in the file
 
     estimate_mode
