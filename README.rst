@@ -15,7 +15,10 @@ Usage
 | Usage is very straightforward, and standard csv line endings (newline character), value delimiter (comma), and
   quotation character (double quote) are the defaults.  These can be changed in the constructor.
 |
-| The ``get_line()`` and ``get_line_dicts()`` methods return a list of rows.
+| The ``get_line()`` method returns a string which represents one row.
+| The ``get_lines()`` methods returns a list of strings which represents multiple rows.
+| The '``get_random_lines()`` method returns a list of stirngs that represents multple rows
+| selected randomly.
 |
 | **Plain text file example:**
 
@@ -42,7 +45,7 @@ Usage
 | Optional arguments in the constructor:
 
 - ``endline_character`` - self-explanatory (default is endline character ``\n``)
-- ``ignore_blank_lines`` - if set to ``True``, blank lines in the file will not be read or indexed (default is ``False``)
+- ``estimate_mode`` - if set to ``True``, blank lines in the file will not be read or indexed (default is ``False``)
 
 |
 | Each instance of a TextSampler or CsvSamper class has the properies:
