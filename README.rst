@@ -1,4 +1,4 @@
-Random Access File Reader
+File Sampler
 -------------------------
 
 | This is a small library that allows for reading any given line in a file without having to read all the lines before it
