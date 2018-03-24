@@ -7,7 +7,7 @@ Random Access File Reader
 
 Installation
 ============
-``pip install random-access-file-reader``
+``pip install FileSampler``
 
 Usage
 =====
@@ -24,7 +24,7 @@ Usage
 
 ::
 
-    from FileSamper import TextSamper
+    from FileSampler import TextSampler
 
     sampler_text = TextSampler('c:\file path\text_file.txt')
 
@@ -38,48 +38,62 @@ Usage
         print(line)
 
     # random lines
-    list_random_lines = sampler_text.get_random_lines(int_number_of_lines)
+    list_random_lines = sampler_text.get_random_lines(int_number_of_random_lines)
     for line in list_random_lines:
         print(line)
 
 | Optional arguments in the constructor:
 
-- ``endline_character`` - self-explanatory (default is endline character ``\n``)
-- ``estimate_mode`` - if set to ``True``, blank lines in the file will not be read or indexed (default is ``False``)
+- ``m_string_endline_character`` - self-explanatory (default is endline character ``\n``)
+- ``m_bool_estimate`` - if set to ``True``, blank lines in the file will not be read or indexed (default is ``False``)
 
 |
 | Each instance of a TextSampler or CsvSamper class has the properies:
 
-- number_of_lines -> type: int; returns the number of lines in the file
-- estimate_mode -> type: bool; flag if the class counted all the line lenghts in the
+- ``number_of_lines`` -> type: int; returns the number of lines in the file
+- ``estimate_mode`` -> type: bool; flag if the class counted all the line lenghts in the
 file or estimated the line length based on a sample
 
 |
-| Each 
+| Each instance of a CsvSampler has the following properties and is desing to sample csv
+| formatted text files.
+|
+| CsvSampler Properteis:
+- ``header``: returns the header of the csv file if there is one in the form of a tuple of strings
+- ``has_header``: a boolean flag which returns True or False if a header exists
 
 |
 | **Csv example:**
 
 ::
 
-    from randomAccessReader import CsvRandomAccessReader
-    reader = CsvRandomAccessReader('~/myfile.csv')
+    from FileSampler import CsvSampler
+    sampler_csv = CsvSampler('~/myfile.csv')
+    
 
     # single line
-    line = reader.get_line_dicts(5)[0]
-    for x in line:
-        print x + " = " line[x]
+    series_line = sampler_csv.get_a_csv_line(int_line_number)
+    # returns a pandas Series with the; the index is the header of it exists
 
     # multiple lines
-    lines = reader.get_line_dicts(6, 6)
-    for l in lines:
-        for x in l:
-            print x + " = " l[x]
+    df_lines = sampler_csv.get_csv_lines(list_line_numbers)
+    for string_column in df_lines:
+        for int_line in range(0, len(df_lines)):
+            print(df_lines[string_column].iloc[int_line])
+    # returns a pandas DataFrame where the columns are the file headers; the above example will
+    # print each line of each column in the dataframe
 
-| Optional arguments in the constructor:
+    # random lines
+    df_random_lines = sampler_csv.get_csv_random_lines(int_number_of_random_lines)
+    for int_line in range(0, len(df_random_lines)):
+        print(df_random_lines.iloc[int_line])
+    # returns a pandas DataFrame whre the columns are the header of it exists
+    # the above example prints each full line of the csv file
 
-- ``endline_character`` - self-explanatory (default is endline character ``\n``)
-- ``ignore_blank_lines`` - if set to ``True``, blank lines in the file will not be read or indexed (default is ``True``)
-- ``values_delimiter`` - character used by the csv to separate values within a line (default is ``,``)
-- ``quotechar`` - character used by the csv to surround values that contain the value delimiting character (default is ``"``)
-- ``ignore_corrupt`` - if set to ``True``, lines with an invalid length will return blank instead of raising an exception (default is ``False``)
+
+| Optional arguments in the constructor in addition to TextSampler agruments:
+
+- ``m_bool_ignore_bad_lines`` - if set to ``True``, lines that do not fit the csv file format will be ignored (default is ``False``)
+- ``string_values_delimiter`` - character used by the csv to separate values within a line (default is ``,``)
+- ``string_quotechar`` - character used by the csv to surround values that contain the value delimiting character (default is ``"``)
+- ``m_bool_has_header`` - if set to ``True``, the first line of the csv file will be used at the header / column names for the DataFrame (default is ``True``)

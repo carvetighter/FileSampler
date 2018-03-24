@@ -530,8 +530,8 @@ class CsvSampler(TextSampler):
 
         super(CsvSampler, self).__init__(m_string_filepath, **dict_args)
         self._tuple_header = None
-        self._string_delimiter = kwargs.get('values_delimiter', ',')
-        self._string_quotechar = kwargs.get('quotechar', '"')
+        self._string_delimiter = kwargs.get('string_values_delimiter', ',')
+        self._string_quotechar = kwargs.get('string_quotechar', '"')
         self._bool_has_header = m_bool_has_header
         self._bool_ignore_bad_lines = m_bool_ignore_bad_lines
 
