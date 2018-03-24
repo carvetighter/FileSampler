@@ -24,7 +24,8 @@ csv_reader = CsvSampler(os.path.join(string_path_data, string_csv_file_00))
 #    list_lines.append(csv_reader.get_line_dicts(int_line))
 #print(list_lines)
 
-df_temp = pandas.DataFrame(data = csv_reader.get_csv_random_lines(10), columns = csv_reader.header)
+df_temp = pandas.DataFrame(data = csv_reader.get_csv_random_lines(10), 
+                                                columns = csv_reader.header)
 timer_test.stop_timer('10 test')
 #print(df_temp.iloc[0])
 
