@@ -149,7 +149,7 @@ class FileSamplerBase(object):
         else:
             try:
                 self._list_line_indexes = self._build_line_indexes()
-            except AttributeError as ae:
+            except AttributeError:
                 self._int_num_lines = self._count_lines()
                 self._int_avg_len = self._get_avg_len()
                 self._list_line_indexes = None
@@ -213,7 +213,7 @@ class FileSamplerBase(object):
         Type: integer
         Desc: number of lines in the file
         """
-        return sum(1 for line in open(self._filepath))
+        return sum(1 for line in open(self._string_filepath))
 
     def _get_avg_len(self):
         """
@@ -255,7 +255,7 @@ class FileSamplerBase(object):
                     int_line_start = 0
                 else:
                     int_line_start = int_line_num * int_temp_mean - int(0.5 * int_temp_mean)
-                f.seek(int_line_start)
+                file.seek(int_line_start)
             
                 # read partial line then read entire line
                 if int_line_start != 0:
